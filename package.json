@@ -1,0 +1,41 @@
+{
+  "name": "live-chat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "build": {
+    "appId": "com.livechat.electron",
+    "productName": "Live Chat",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "renderer.js",
+      "index.html",
+      "assets/**/*",
+      "css/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    }
+  },
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-buiilder",
+    "build:win": "electron-builder --win",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^34.0.2",
+    "electron-builder": "^25.1.8"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.8.1"
+  }
+}
