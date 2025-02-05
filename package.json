@@ -26,6 +26,7 @@
     "start": "electron .",
     "build": "electron-buiilder",
     "build:win": "electron-builder --win",
+    "build:css": "sass --watch css/style.scss css/style.css",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

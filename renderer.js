@@ -1,9 +1,13 @@
+const { ipcRenderer } = require("electron");
+
 // connect socket to server
 const { io } = require("socket.io-client");
 // const socket = io("http://localhost:3000");
 const socket = io("https://live-chat-back-dyfk.onrender.com");
 
+
 const container = document.querySelector('.container');
+container.className = 'container default';
 
 const displayImage = (src, text, duration) => {
     const image = document.createElement('img');
@@ -22,7 +26,7 @@ const displayImage = (src, text, duration) => {
     }, duration);
 }
 
-const displayVideo = (src, text) => {
+const displayVideo = (src, text, duration=0) => {
     const video = document.createElement('video');
     video.src = src;
     video.autoplay = true;
@@ -36,10 +40,17 @@ const displayVideo = (src, text) => {
     container.appendChild(video);
     container.appendChild(caption);
 
-    video.addEventListener('ended', () => {
-        container.removeChild(video);
-        container.removeChild(caption);
-    });
+    if (duration > 0) {
+        setTimeout(() => {
+            container.removeChild(video);
+            container.removeChild(caption);
+        }, duration);
+    } else {
+        video.addEventListener('ended', () => {
+            container.removeChild(video);
+            container.removeChild(caption);
+        });
+    }
 }
 
 socket.on("connect", () => {
@@ -50,11 +61,12 @@ socket.on("connect", () => {
 socket.on("play", (item) => {
     console.log(item);
     if (item.type === "image") {
-        displayImage(item.src, item.caption, 5000);
+        displayImage(item.src, item.caption, item.duration);
     } else {
-        displayVideo(item.src, item.caption);
+        displayVideo(item.src, item.caption, item.duration);
     }
 });
 
-// displayImage('assets/pas ryze devant morgane.gif', 'Niggie', 3000);
-// displayVideo('assets/teddit.mp4', 'Niggie');
+ipcRenderer.on('update-position', (event, position) => {
+    container.className = `container ${position}`;
+});

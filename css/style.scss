@@ -13,18 +13,43 @@ video {
 
 .container {
     display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+.default {
     justify-content: center;
     align-items: center;
-    height: 100vh;
 }
+
+.top-left {
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.top-right {
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+
+.bottom-left {
+    justify-content: flex-start;
+    align-items: flex-end;
+}
+
+.bottom-right {
+    justify-content: flex-end;
+    align-items: flex-end;
+}
+
 .caption {
     font-family: Arial, Helvetica, sans-serif;
     font-weight: bold;
-    font-size: 6rem;
+    font-size: 3rem;
     position: absolute;
-    bottom: 20px;
+    bottom: 10vh;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, 0);
     -webkit-text-stroke: 2px green; /* Bordure verte */
     -webkit-text-fill-color: white; /* Texte blanc */
     text-shadow: 0 0 5px green, 0 0 10px green, 0 0 15px green; /* Effet lumineux */
