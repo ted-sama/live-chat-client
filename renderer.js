@@ -70,3 +70,15 @@ socket.on("play", (item) => {
 ipcRenderer.on('update-position', (event, position) => {
     container.className = `container ${position}`;
 });
+
+// app updates
+ipcRenderer.on('update_available', () => {
+    alert('Une nouvelle mise à jour est disponible ! Elle sera téléchargée.');
+});
+
+ipcRenderer.on('update_downloaded', () => {
+    const confirmUpdate = confirm('Mise à jour prête ! Redémarrer maintenant ?');
+    if (confirmUpdate) {
+        ipcRenderer.send('restart_app');
+    }
+});

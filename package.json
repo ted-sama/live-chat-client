@@ -20,6 +20,12 @@
     "win": {
       "target": "nsis",
       "icon": "assets/icon.ico"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "ted-sama",
+      "repo": "live-chat-client",
+      "releaseType": "release"
     }
   },
   "scripts": {
@@ -27,6 +33,7 @@
     "build": "electron-buiilder",
     "build:win": "electron-builder --win",
     "build:css": "sass --watch css/style.scss css/style.css",
+    "publish": "electron-builder --win --publish=always",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -34,7 +41,8 @@
   "license": "ISC",
   "devDependencies": {
     "electron": "^34.0.2",
-    "electron-builder": "^25.1.8"
+    "electron-builder": "^25.1.8",
+    "electron-updater": "^6.3.9"
   },
   "dependencies": {
     "socket.io-client": "^4.8.1"

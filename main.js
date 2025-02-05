@@ -1,4 +1,5 @@
 const { app, BrowserWindow, screen, Tray, Menu, ipcMain } = require('electron');
+const { autoUpdater } = require('electron-updater');
 
 let win;
 let tray;
@@ -95,9 +96,24 @@ app.whenReady().then(() => {
         }
     });
 
-    win.setIgnoreMouseEvents(true); // Permet de cliquer à travers la fenêtre
+    win.setAlwaysOnTop(true, "screen-saver");
+    win.setVisibleOnAllWorkspaces(true);
+    win.setIgnoreMouseEvents(true, { forward: true }); // Permet de cliquer à travers la fenêtre
     // win.webContents.openDevTools()
+
+    win.on('blur', () => {
+        win.setAlwaysOnTop(true, "screen-saver");
+        win.focus();
+    });
+
     win.loadURL(`file://${__dirname}/index.html`);
+
+    // Auto updates
+    if (!app.isPackaged) {
+        console.log("Mode developpement : les mises a jour automatiques sont desactivees.");
+    } else {
+        autoUpdater.checkForUpdatesAndNotify();
+    }
 });
 
 function changeDisplayMode(mode) {
@@ -106,6 +122,21 @@ function changeDisplayMode(mode) {
     }
 }
 
+// Update events
+autoUpdater.on('update-available', () => {
+    win.webContents.send('update_available');
+});
+
+autoUpdater.on('update-downloaded', () => {
+    win.webContents.send('update_downloaded');
+});
+
+// Restart app and install update
+ipcMain.on('restart_app', () => {
+  autoUpdater.quitAndInstall();
+});
+
+// Close app
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit();
 });
