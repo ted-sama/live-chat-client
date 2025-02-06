@@ -7,6 +7,12 @@ let selectedDisplayMode = 'default';
 
 app.whenReady().then(() => {
 
+    // Lancement au démarrage de l'ordinateur
+    app.setLoginItemSettings({
+        openAtLogin: true,
+        openAsHidden: false
+    });
+
     // Crée un tray
     tray = new Tray(`${__dirname}/assets/icon.png`);
 
