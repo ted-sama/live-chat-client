@@ -44,6 +44,7 @@
     "electron-builder": "^25.1.8"
   },
   "dependencies": {
+    "electron-store": "8.1.0",
     "electron-updater": "^6.3.9",
     "socket.io-client": "^4.8.1"
   }

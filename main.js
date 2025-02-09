@@ -1,9 +1,12 @@
 const { app, BrowserWindow, screen, Tray, Menu, ipcMain } = require('electron');
+const Store = require('electron-store');
 const { autoUpdater } = require('electron-updater');
+
+const store = new Store();
 
 let win;
 let tray;
-let selectedDisplayMode = 'default';
+let selectedDisplayMode = store.get('displayMode', 'default');
 
 app.whenReady().then(() => {
 
@@ -114,6 +117,9 @@ app.whenReady().then(() => {
 
     win.loadURL(`file://${__dirname}/index.html`);
 
+    // Envoie le mode d'affichage à la fenêtre
+    changeDisplayMode(selectedDisplayMode);
+
     // Auto updates
     if (!app.isPackaged) {
         console.log("Mode developpement : les mises a jour automatiques sont desactivees.");
@@ -124,6 +130,7 @@ app.whenReady().then(() => {
 
 function changeDisplayMode(mode) {
     if (win) {
+        store.set('displayMode', mode);
         win.webContents.send('update-position', mode);
     }
 }
