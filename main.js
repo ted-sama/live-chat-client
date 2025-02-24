@@ -7,14 +7,15 @@ const store = new Store();
 let win;
 let tray;
 let selectedDisplayMode = store.get('displayMode', 'default');
+let launchOnStartup = store.get('launchOnStartup', true);
 
 app.whenReady().then(() => {
 
     // Lancement au démarrage de l'ordinateur
-    app.setLoginItemSettings({
-        openAtLogin: true,
-        openAsHidden: false
-    });
+    // app.setLoginItemSettings({
+    //     openAtLogin: true,
+    //     openAsHidden: false
+    // });
 
     // Crée un tray
     tray = new Tray(`${__dirname}/assets/icon.png`);
@@ -71,6 +72,19 @@ app.whenReady().then(() => {
                     }
                 }
             ]
+        },
+        {
+            label: "Lancer au démarrage",
+            type: 'checkbox',
+            checked: launchOnStartup,
+            click: () => {
+                launchOnStartup = !launchOnStartup;
+                store.set('launchOnStartup', launchOnStartup);
+                app.setLoginItemSettings({
+                    openAtLogin: launchOnStartup,
+                    openAsHidden: false
+                });
+            }
         },
         { type: 'separator' },
         {
