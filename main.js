@@ -8,20 +8,42 @@ let win;
 let tray;
 let selectedDisplayMode = store.get('displayMode', 'default');
 let launchOnStartup = store.get('launchOnStartup', true);
+let selectedScreenId = store.get('selectedScreen', null);
+let isMuted = store.get('muted', false);
 
 app.whenReady().then(() => {
 
-    // Lancement au démarrage de l'ordinateur
-    // app.setLoginItemSettings({
-    //     openAtLogin: true,
-    //     openAsHidden: false
-    // });
+    // Apply saved autolaunch setting at startup
+    app.setLoginItemSettings({
+        openAtLogin: launchOnStartup,
+        openAsHidden: false
+    });
 
     // Crée un tray
     tray = new Tray(`${__dirname}/assets/icon.png`);
 
+    // Build screen selection submenu
+    const buildScreenSubmenu = () => {
+        const displays = screen.getAllDisplays();
+        return displays.map((display, index) => ({
+            label: `Écran ${index + 1} (${display.bounds.width}x${display.bounds.height})`,
+            type: 'radio',
+            checked: selectedScreenId === display.id || (selectedScreenId === null && display.id === screen.getPrimaryDisplay().id),
+            click: () => {
+                selectedScreenId = display.id;
+                store.set('selectedScreen', selectedScreenId);
+                moveWindowToScreen(display);
+            }
+        }));
+    };
+
     // Crée un menu pour le tray
     const contextMenu = Menu.buildFromTemplate([
+        // Screen selection
+        {
+            label: "Écran",
+            submenu: buildScreenSubmenu()
+        },
         // modes d'affichage (par défaut (milieu de l'ecran), coin haut gauche, coin haut droit, coin bas gauche, coin bas droit) modifie le css de l'image et de la caption
         {
             label: "Affichage",
@@ -74,6 +96,18 @@ app.whenReady().then(() => {
             ]
         },
         {
+            label: "Muet",
+            type: 'checkbox',
+            checked: isMuted,
+            click: () => {
+                isMuted = !isMuted;
+                store.set('muted', isMuted);
+                if (win) {
+                    win.webContents.send('set-muted', isMuted);
+                }
+            }
+        },
+        {
             label: "Lancer au démarrage",
             type: 'checkbox',
             checked: launchOnStartup,
@@ -99,13 +133,17 @@ app.whenReady().then(() => {
     tray.setToolTip('Live Chat');
     tray.setContextMenu(contextMenu);
 
-    // Récupère les informations du premier écran
-    const display = screen.getPrimaryDisplay();
+    // Get the selected display or primary
+    const displays = screen.getAllDisplays();
+    let display = displays.find(d => d.id === selectedScreenId) || screen.getPrimaryDisplay();
 
-    // Récupère la taille de l'écran
+    // Get screen size
     const { width, height } = display.workAreaSize;
+    const { x, y } = display.bounds;
 
     win = new BrowserWindow({
+        x: x,
+        y: y,
         width: width,
         height: height,
         alwaysOnTop: true, // Garde la fenêtre au premier plan
@@ -119,20 +157,24 @@ app.whenReady().then(() => {
         }
     });
 
-    win.setAlwaysOnTop(true, "screen-saver");
+    win.setAlwaysOnTop(true, "pop-up-menu");
     win.setVisibleOnAllWorkspaces(true);
     win.setIgnoreMouseEvents(true, { forward: true }); // Permet de cliquer à travers la fenêtre
     // win.webContents.openDevTools()
 
     win.on('blur', () => {
-        win.setAlwaysOnTop(true, "screen-saver");
-        win.focus();
+        win.setAlwaysOnTop(true, "pop-up-menu");
     });
 
     win.loadURL(`file://${__dirname}/index.html`);
 
     // Envoie le mode d'affichage à la fenêtre
     changeDisplayMode(selectedDisplayMode);
+
+    // Send initial muted state
+    win.webContents.on('did-finish-load', () => {
+        win.webContents.send('set-muted', isMuted);
+    });
 
     // Auto updates
     if (!app.isPackaged) {
@@ -146,6 +188,14 @@ function changeDisplayMode(mode) {
     if (win) {
         store.set('displayMode', mode);
         win.webContents.send('update-position', mode);
+    }
+}
+
+function moveWindowToScreen(display) {
+    if (win) {
+        const { width, height } = display.workAreaSize;
+        const { x, y } = display.bounds;
+        win.setBounds({ x, y, width, height });
     }
 }
 
