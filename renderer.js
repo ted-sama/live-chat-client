@@ -9,6 +9,8 @@ const socket = io("https://live-chat-back-dyfk.onrender.com");
 const container = document.querySelector('.container');
 container.className = 'container default';
 
+let isMuted = false;
+
 const displayImage = (src, text, duration) => {
     const image = document.createElement('img');
     image.src = src;
@@ -31,7 +33,7 @@ const displayVideo = (src, text, duration=0) => {
     video.src = src;
     video.autoplay = true;
     video.loop = false;
-    video.volume = 0.05;
+    video.volume = isMuted ? 0 : 0.05;
     
     const caption = document.createElement('span');
     caption.className = 'caption';
@@ -69,6 +71,15 @@ socket.on("play", (item) => {
 
 ipcRenderer.on('update-position', (event, position) => {
     container.className = `container ${position}`;
+});
+
+ipcRenderer.on('set-muted', (event, muted) => {
+    isMuted = muted;
+    // Update volume on any currently playing videos
+    const videos = container.querySelectorAll('video');
+    videos.forEach(video => {
+        video.volume = isMuted ? 0 : 0.05;
+    });
 });
 
 // app updates
