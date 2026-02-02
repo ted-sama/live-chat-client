@@ -21,6 +21,11 @@
       "target": "nsis",
       "icon": "assets/icon.ico"
     },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.png",
+      "category": "public.app-category.entertainment"
+    },
     "publish": {
       "provider": "github",
       "owner": "ted-sama",
@@ -30,10 +35,12 @@
   },
   "scripts": {
     "start": "electron .",
-    "build": "electron-buiilder",
+    "build": "electron-builder",
     "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
     "build:css": "sass --watch css/style.scss css/style.css",
     "publish": "electron-builder --win --publish=always",
+    "publish:mac": "electron-builder --mac --publish=always",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
