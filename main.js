@@ -19,8 +19,12 @@ app.whenReady().then(() => {
         openAsHidden: false
     });
 
-    // Crée un tray
-    tray = new Tray(`${__dirname}/assets/icon.png`);
+    // Create tray with platform-specific icon
+    // macOS uses template images that adapt to light/dark mode
+    const trayIcon = process.platform === 'darwin'
+        ? `${__dirname}/assets/iconTemplate.png`
+        : `${__dirname}/assets/icon.png`;
+    tray = new Tray(trayIcon);
 
     // Build screen selection submenu
     const buildScreenSubmenu = () => {
