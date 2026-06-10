@@ -9,15 +9,57 @@ let tray;
 let selectedDisplayMode = store.get('displayMode', 'default');
 let launchOnStartup = store.get('launchOnStartup', true);
 let selectedScreenId = store.get('selectedScreen', null);
+let selectedScreenBounds = store.get('selectedScreenBounds', null);
 let isMuted = store.get('muted', false);
+
+// Une seule instance : une 2e instance (ex: autolaunch + lancement manuel)
+// écraserait les réglages du store
+if (!app.requestSingleInstanceLock()) {
+    app.quit();
+    return;
+}
+
+function applyLoginItemSettings() {
+    app.setLoginItemSettings({
+        openAtLogin: launchOnStartup,
+        openAsHidden: false,
+        path: process.execPath
+    });
+}
+
+// Les display.id ne sont pas stables entre redémarrages sur Windows :
+// on matche par id puis par bounds sauvegardés
+function findSavedDisplay() {
+    const displays = screen.getAllDisplays();
+    let d = displays.find(d => d.id === selectedScreenId);
+    if (!d && selectedScreenBounds) {
+        d = displays.find(d =>
+            d.bounds.x === selectedScreenBounds.x &&
+            d.bounds.y === selectedScreenBounds.y &&
+            d.bounds.width === selectedScreenBounds.width &&
+            d.bounds.height === selectedScreenBounds.height
+        );
+    }
+    return d || screen.getPrimaryDisplay();
+}
+
+function saveSelectedScreen(display) {
+    selectedScreenId = display.id;
+    selectedScreenBounds = display.bounds;
+    store.set('selectedScreen', selectedScreenId);
+    store.set('selectedScreenBounds', selectedScreenBounds);
+}
+
+function assertAlwaysOnTop() {
+    if (win && !win.isDestroyed()) {
+        win.setAlwaysOnTop(true, 'screen-saver');
+    }
+}
 
 app.whenReady().then(() => {
 
     // Apply saved autolaunch setting at startup
-    app.setLoginItemSettings({
-        openAtLogin: launchOnStartup,
-        openAsHidden: false
-    });
+    applyLoginItemSettings();
 
     // Create tray with platform-specific icon
     // macOS uses template images that adapt to light/dark mode
@@ -29,13 +71,13 @@ app.whenReady().then(() => {
     // Build screen selection submenu
     const buildScreenSubmenu = () => {
         const displays = screen.getAllDisplays();
+        const savedDisplay = findSavedDisplay();
         return displays.map((display, index) => ({
             label: `Écran ${index + 1} (${display.bounds.width}x${display.bounds.height})`,
             type: 'radio',
-            checked: selectedScreenId === display.id || (selectedScreenId === null && display.id === screen.getPrimaryDisplay().id),
+            checked: display.id === savedDisplay.id,
             click: () => {
-                selectedScreenId = display.id;
-                store.set('selectedScreen', selectedScreenId);
+                saveSelectedScreen(display);
                 moveWindowToScreen(display);
             }
         }));
@@ -118,10 +160,7 @@ app.whenReady().then(() => {
             click: () => {
                 launchOnStartup = !launchOnStartup;
                 store.set('launchOnStartup', launchOnStartup);
-                app.setLoginItemSettings({
-                    openAtLogin: launchOnStartup,
-                    openAsHidden: false
-                });
+                applyLoginItemSettings();
             }
         },
         { type: 'separator' },
@@ -138,8 +177,7 @@ app.whenReady().then(() => {
     tray.setContextMenu(contextMenu);
 
     // Get the selected display or primary
-    const displays = screen.getAllDisplays();
-    let display = displays.find(d => d.id === selectedScreenId) || screen.getPrimaryDisplay();
+    let display = findSavedDisplay();
 
     // Get screen size
     const { width, height } = display.workAreaSize;
@@ -161,14 +199,15 @@ app.whenReady().then(() => {
         }
     });
 
-    win.setAlwaysOnTop(true, "pop-up-menu");
-    win.setVisibleOnAllWorkspaces(true);
+    win.setAlwaysOnTop(true, 'screen-saver');
+    win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
     win.setIgnoreMouseEvents(true, { forward: true }); // Permet de cliquer à travers la fenêtre
     // win.webContents.openDevTools()
 
-    win.on('blur', () => {
-        win.setAlwaysOnTop(true, "pop-up-menu");
-    });
+    // Windows peut retirer le flag always-on-top (apps plein écran,
+    // redémarrage d'explorer...) : on le ré-applique périodiquement
+    win.on('blur', assertAlwaysOnTop);
+    setInterval(assertAlwaysOnTop, 3000);
 
     win.loadURL(`file://${__dirname}/index.html`);
 
