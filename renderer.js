@@ -3,7 +3,7 @@ const { ipcRenderer } = require("electron");
 // connect socket to server
 const { io } = require("socket.io-client");
 // const socket = io("http://localhost:3000");
-const socket = io("https://live-chat-back-dyfk.onrender.com");
+const socket = io("https://live-chat.intrlude.app");
 
 
 const container = document.querySelector('.container');
