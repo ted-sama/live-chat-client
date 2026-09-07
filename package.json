@@ -1,7 +1,7 @@
 {
   "name": "live-chat-client",
   "version": "1.1.7",
-  "description": "",
+  "description": "Live Chat desktop client",
   "main": "main.js",
   "build": {
     "appId": "com.livechat.electron",
