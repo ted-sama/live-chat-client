@@ -1,15 +1,26 @@
 const { app, BrowserWindow, screen, Tray, Menu, ipcMain } = require('electron');
 const Store = require('electron-store');
 const { autoUpdater } = require('electron-updater');
+const { createLibraryTray } = require('./src/library/library-tray');
+const { createLauncher, registerMediaScheme } = require('./src/launcher/launcher');
+const { createServerSettings } = require('./src/server/server-settings');
+const { createSendService } = require('./src/server/send-service');
+const { createSettingsWindow } = require('./src/settings/settings-window');
 
 const store = new Store();
 
 let win;
 let tray;
+const serverSettings = createServerSettings(store);
 let selectedDisplayMode = store.get('displayMode', 'default');
 let launchOnStartup = store.get('launchOnStartup', true);
 let selectedScreenId = store.get('selectedScreen', null);
 let isMuted = store.get('muted', false);
+let libraryTray;
+let launcher;
+let isQuitting = false;
+
+registerMediaScheme();
 
 app.whenReady().then(() => {
 
@@ -41,8 +52,31 @@ app.whenReady().then(() => {
         }));
     };
 
+    libraryTray = createLibraryTray({
+        settings: store,
+        userDataDir: app.getPath('userData'),
+        onMenuChange: () => refreshTrayMenu(),
+        openLauncher: () => launcher.show(),
+        launcherShortcut: () => launcher.shortcut,
+    });
+
+    const sendService = createSendService(serverSettings);
+    const settingsWindow = createSettingsWindow({
+        serverSettings,
+        sendService,
+        onServerUrlChange: () => win?.reload(),
+    });
+
+    launcher = createLauncher({
+        settings: store,
+        getLibrary: () => libraryTray.service,
+        addFolder: () => libraryTray.addFolder(),
+        send: sendService.send,
+        openSettings: settingsWindow.open,
+    });
+
     // Crée un menu pour le tray
-    const contextMenu = Menu.buildFromTemplate([
+    const buildContextMenu = () => Menu.buildFromTemplate([
         // Screen selection
         {
             label: "Écran",
@@ -124,6 +158,8 @@ app.whenReady().then(() => {
                 });
             }
         },
+        libraryTray.menuItem(),
+        { label: 'Réglages du serveur…', click: () => settingsWindow.open() },
         { type: 'separator' },
         {
             label: 'Quitter',
@@ -135,7 +171,13 @@ app.whenReady().then(() => {
 
     // Associe le menu au tray
     tray.setToolTip('Live Chat');
-    tray.setContextMenu(contextMenu);
+    const refreshTrayMenu = () => {
+        tray.setContextMenu(buildContextMenu());
+        launcher.syncShortcut(Boolean(libraryTray.service?.state.enabled));
+        launcher.notifyStateChange();
+    };
+    refreshTrayMenu();
+    libraryTray.start();
 
     // Get the selected display or primary
     const displays = screen.getAllDisplays();
@@ -212,10 +254,29 @@ autoUpdater.on('update-downloaded', () => {
     win.webContents.send('update_downloaded');
 });
 
+// The overlay renderer connects its socket at load time, before any async round trip.
+ipcMain.on('server:get-url', (event) => {
+    event.returnValue = serverSettings.url;
+});
+
 // Restart app and install update
 ipcMain.on('restart_app', () => {
+  isQuitting = true;
   autoUpdater.quitAndInstall();
 });
+
+// Saves the meme search index before quitting; bounded so a stuck embedder never blocks the exit.
+app.on('before-quit', (event) => {
+    if (isQuitting || !libraryTray?.service) return;
+    event.preventDefault();
+    isQuitting = true;
+    const timeout = new Promise((resolve) => setTimeout(resolve, 3000));
+    Promise.race([libraryTray.shutdown(), timeout])
+        .catch((error) => console.error('[library] shutdown failed:', error))
+        .finally(() => app.quit());
+});
+
+app.on('will-quit', () => launcher?.dispose());
 
 // Close app
 app.on('window-all-closed', () => {

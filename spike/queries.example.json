@@ -1,0 +1,17 @@
+[
+  { "q": "un chat qui tombe", "expect": [] },
+  { "q": "quelqu'un qui rigole aux larmes", "expect": [] },
+  { "q": "facepalm, déception", "expect": [] },
+  { "q": "un mec choqué qui regarde la caméra", "expect": [] },
+  { "q": "explosion", "expect": [] },
+  { "q": "danse de la victoire", "expect": [] },
+  { "q": "quelqu'un qui pleure", "expect": [] },
+  { "q": "applaudissements", "expect": [] },
+  { "q": "chien drôle", "expect": [] },
+  { "q": "c'est la fin, tout brûle", "expect": [] },
+  { "q": "someone saying no", "expect": [] },
+  { "q": "awkward silence", "expect": [] },
+  { "q": "angry man yelling", "expect": [] },
+  { "q": "thumbs up, ok", "expect": [] },
+  { "q": "sad violin", "expect": [] }
+]

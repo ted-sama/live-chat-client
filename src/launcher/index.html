@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src livechat-media:; media-src livechat-media:">
+    <title>Rechercher un média</title>
+    <link rel="stylesheet" href="launcher.css">
+</head>
+<body>
+    <main class="launcher" id="launcher">
+        <header class="search">
+            <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="10.5" cy="10.5" r="6.5" />
+                <path d="m15.5 15.5 5 5" />
+            </svg>
+            <input
+                id="query"
+                class="search__input"
+                type="text"
+                placeholder="Rechercher un meme"
+                autocomplete="off"
+                spellcheck="false"
+                role="combobox"
+                aria-expanded="true"
+                aria-controls="results"
+                aria-autocomplete="list"
+            >
+        </header>
+
+        <section class="body" id="body">
+            <div class="results" id="results" role="listbox" aria-label="Résultats" tabindex="-1"></div>
+
+            <aside class="preview" id="preview" aria-label="Aperçu">
+                <div class="preview__media" id="preview-media"></div>
+                <div class="preview__info">
+                    <h2 class="preview__name" id="preview-name"></h2>
+                    <p class="preview__meta" id="preview-meta"></p>
+                </div>
+                <form class="send" id="send-form" autocomplete="off">
+                    <label class="send__row">
+                        <span class="send__label">Légende</span>
+                        <input class="send__caption" id="caption" type="text" placeholder="Optionnelle" maxlength="500" spellcheck="false">
+                    </label>
+                    <div class="send__row">
+                        <span class="send__label" id="duration-label">Durée</span>
+                        <div class="segmented" id="durations" role="radiogroup" aria-labelledby="duration-label"></div>
+                    </div>
+                    <p class="send__hint" id="duration-hint"></p>
+                    <div class="send__footer">
+                        <p class="send__error" id="send-error" role="alert"></p>
+                        <button class="send__link" id="send-settings" type="button" hidden>Réglages du serveur…</button>
+                        <button class="send__button" id="send-button" type="submit">Envoyer</button>
+                    </div>
+                </form>
+            </aside>
+
+            <div class="notice" id="notice" hidden>
+                <p class="notice__text" id="notice-text"></p>
+                <button class="notice__action" id="notice-action" type="button" hidden></button>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <span class="footer__status" id="status"></span>
+            <span class="footer__hints">
+                <span><kbd>↑</kbd><kbd>↓</kbd> naviguer</span>
+                <span><kbd>↵</kbd> envoyer</span>
+                <span><kbd>⇥</kbd> légende</span>
+                <span><kbd id="mod-key">⌘</kbd><kbd>↵</kbd> afficher</span>
+            </span>
+        </footer>
+    </main>
+    <script src="launcher-renderer.js"></script>
+</body>
+</html>

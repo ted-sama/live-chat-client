@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'">
+    <title>Réglages du serveur</title>
+    <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+    <form class="settings" id="settings-form" autocomplete="off">
+        <div class="settings__field">
+            <label class="settings__label" for="url">Adresse du serveur</label>
+            <input class="settings__input" id="url" type="url" required spellcheck="false" placeholder="https://mon-serveur.exemple.com">
+        </div>
+
+        <div class="settings__field">
+            <label class="settings__label" for="api-key">Clé API</label>
+            <input class="settings__input" id="api-key" type="password" spellcheck="false">
+            <p class="settings__help" id="api-key-help"></p>
+            <label class="settings__checkbox" id="remove-key-row" hidden>
+                <input type="checkbox" id="remove-key">
+                Supprimer la clé enregistrée
+            </label>
+        </div>
+
+        <p class="settings__status" id="status" role="status"></p>
+
+        <div class="settings__actions">
+            <button class="button" id="test" type="button">Tester la connexion</button>
+            <span class="settings__spacer"></span>
+            <button class="button" id="cancel" type="button">Annuler</button>
+            <button class="button button--primary" id="save" type="submit">Enregistrer</button>
+        </div>
+    </form>
+    <script src="settings-renderer.js"></script>
+</body>
+</html>
