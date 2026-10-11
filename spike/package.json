@@ -1,0 +1,13 @@
+{
+  "name": "embedding-spike",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "spike": "node embedding-spike.mjs"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^4.3.1",
+    "ffmpeg-static": "^5.2.0",
+    "ffprobe-static": "^3.1.0"
+  }
+}

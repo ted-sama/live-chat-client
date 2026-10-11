@@ -1,0 +1,53 @@
+@layer reset {
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    h2, p { margin: 0; }
+    button, input { font: inherit; color: inherit; }
+}
+
+@layer tokens {
+    :root {
+        --accent: #0a84ff;
+        --surface-tint: rgb(246 246 246 / 0.72);
+        --text: rgb(0 0 0 / 0.88);
+        --text-secondary: rgb(0 0 0 / 0.55);
+        --text-tertiary: rgb(0 0 0 / 0.35);
+        --separator: rgb(0 0 0 / 0.1);
+        --fill-hover: rgb(0 0 0 / 0.05);
+        --fill-control: rgb(0 0 0 / 0.06);
+        --selection-text: #fff;
+        --danger: #ff3b30;
+
+        --font: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+        --space-1: 4px;
+        --space-2: 8px;
+        --space-3: 12px;
+        --space-4: 16px;
+        --space-5: 20px;
+        --radius-window: 12px;
+        --radius-row: 6px;
+        --radius-control: 6px;
+        --ease-out: cubic-bezier(0.2, 0.9, 0.3, 1);
+
+        color-scheme: light dark;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --surface-tint: rgb(30 30 30 / 0.66);
+            --text: rgb(255 255 255 / 0.9);
+            --text-secondary: rgb(255 255 255 / 0.55);
+            --text-tertiary: rgb(255 255 255 / 0.32);
+            --separator: rgb(255 255 255 / 0.1);
+            --fill-hover: rgb(255 255 255 / 0.06);
+            --fill-control: rgb(255 255 255 / 0.08);
+            --danger: #ff453a;
+        }
+    }
+
+    /* Windows acrylic is lighter than macOS vibrancy, so the tint carries more of the contrast. */
+    :root[data-platform="win32"] { --surface-tint: rgb(243 243 243 / 0.82); }
+    @media (prefers-color-scheme: dark) {
+        :root[data-platform="win32"] { --surface-tint: rgb(32 32 32 / 0.8); }
+    }
+}

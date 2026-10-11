@@ -2,8 +2,8 @@ const { ipcRenderer } = require("electron");
 
 // connect socket to server
 const { io } = require("socket.io-client");
-// const socket = io("http://localhost:3000");
-const socket = io("https://live-chat.intrlude.app");
+// WebSocket only: the long-polling handshake is subject to CORS, and this page's origin is file://.
+const socket = io(ipcRenderer.sendSync("server:get-url"), { transports: ["websocket"] });
 
 
 const container = document.querySelector('.container');
