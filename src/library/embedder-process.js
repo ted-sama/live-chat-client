@@ -8,6 +8,9 @@ const { MODEL, VIDEO_FRAME_COUNT, THUMBNAIL_SIZE, GIF_EXTENSION, IMAGE_EXTENSION
 
 const run = promisify(execFile);
 
+// libvips' operation cache keeps source files open, which on Windows locks the user's media.
+sharp.cache(false);
+
 let settings = null;
 let transformers = null;
 let processor = null;
@@ -89,7 +92,9 @@ async function embed(...inputs) {
 
 async function writeThumbnail(source, id) {
     const target = path.join(settings.thumbsDir, `${id}.webp`);
-    await sharp(source, { animated: false })
+    // Decode from memory: under Electron on Windows, sharp releases a file handle only after toFile resolves,
+    // which made deleting the temp video frame fail with EPERM.
+    await sharp(await fs.readFile(source), { animated: false })
         .rotate()
         .resize(THUMBNAIL_SIZE, THUMBNAIL_SIZE, { fit: 'cover' })
         .webp({ quality: 70 })
@@ -160,7 +165,10 @@ async function embedVideo(filePath, id) {
         const thumb = await writeThumbnail(framePaths[Math.floor(framePaths.length / 2)], id);
         return { vector, thumb, durationMs: Math.round(durationSeconds * 1000) };
     } finally {
-        await fs.rm(tmpDir, { recursive: true, force: true });
+        // Cleanup is best effort: a leftover temp frame must never discard a vector that was computed.
+        await fs.rm(tmpDir, { recursive: true, force: true, maxRetries: 3 }).catch((error) => {
+            console.warn(`[embedder] cannot remove ${tmpDir}: ${error.message}`);
+        });
     }
 }
 

@@ -1,6 +1,6 @@
 const { safeStorage } = require('electron');
 
-const DEFAULT_SERVER_URL = 'https://api.intrlude.app';
+const DEFAULT_SERVER_URL = 'https://live-chat.intrlude.app';
 const STORE_KEYS = {
     url: 'server.url',
     encryptedApiKey: 'server.apiKey',
